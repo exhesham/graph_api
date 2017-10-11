@@ -123,7 +123,7 @@ public class Graph<T>{
 		
 		return res;
 	}
-	public boolean hasCicle(){
+	public boolean hasCycle(){
 		if(nodes_num == 0){
 			return false;
 		}
@@ -187,7 +187,7 @@ public class Graph<T>{
 			System.out.println();
 		}
 		System.out.println();
-		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).hasCicle());
+		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).hasCycle());
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).hasHamiltonianCycle());
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).getHamiltonianCycle());
 
@@ -205,7 +205,7 @@ public class Graph<T>{
 			}
 			System.out.println();
 		}
-		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).hasCicle());
+		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).hasCycle());
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).hasHamiltonianCycle());
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).getHamiltonianCycle());
 		
@@ -223,7 +223,7 @@ public class Graph<T>{
 			}
 			System.out.println();
 		}
-		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).hasCicle());
+		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).hasCycle());
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).hasHamiltonianCycle());
 
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).getHamiltonianCycle());
