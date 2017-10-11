@@ -37,6 +37,8 @@ hasHamiltonianCycle: boolean result if there is a hamiltonian cycle
 ```
 
 ## Cycle
-Uses DFS to check whether there is a cycle in the graph
+Depth First Traversal can be used to detect cycle in a Graph. DFS for a connected graph produces a tree. There is a cycle in a graph only if there is a back edge present in the graph. A back edge is an edge that is from a node to itself (selfloop) or one of its ancestor in the tree produced by DFS. In the following graph, there are 3 back edges, marked with cross sign. We can observe that these 3 back edges indicate 3 cycles present in the graph.
 
-
+```
+public boolean hasCycle()
+```
