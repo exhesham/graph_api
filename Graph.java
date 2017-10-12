@@ -35,6 +35,45 @@ public class Graph<T>{
 		return false;
 	}
 	
+	public ArrayList<T> topologicalSort(){
+		ArrayList<T> res = new ArrayList<>();
+		Stack<Integer> stack = new Stack<>();
+		
+		boolean[] visited = new boolean[nodes_num];  // store all the sub-graph in the result
+		
+		for(int i=0;i < nodes_num;i++){
+			// the loop is needed to scan all graph components
+			if(! visited[i]){
+				topologicalSortUtil(i, stack,visited);
+			}
+		}
+		
+		// convert the indices into T obj
+		for(int i : stack){
+			res.add(0, names.get(i)); // add to the beginning as we are reading from stack
+		}
+		
+		return res;
+		
+	}
+	
+	/**
+	 * run topological scan on node i with the already given stack and the visited array to mark nodes in the connected graph
+	 * @param root
+	 * @param stack
+	 * @param visited
+	 */
+	private void topologicalSortUtil(int root, Stack<Integer> stack, boolean[] visited) {
+		visited[root] = true;
+		ArrayList<Integer> adj = getAdjucents(root);
+		for(int adjNode : adj){ // cover all graph connectivities
+			if(!visited[adjNode]){
+				topologicalSortUtil(adjNode, stack, visited);
+			}
+		}
+		stack.push(root);
+		
+	}
 	private int getNodeIndex(T node){
 		for(int i : names.keySet()){
 			if(names.get(i).equals(node)){
@@ -190,6 +229,7 @@ public class Graph<T>{
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).hasCycle());
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).hasHamiltonianCycle());
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).getHamiltonianCycle());
+		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).topologicalSort());
 
 		
 		graph = new boolean[4][4];
@@ -227,6 +267,25 @@ public class Graph<T>{
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).hasHamiltonianCycle());
 
 		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3}).getHamiltonianCycle());
+		
+		
+		System.out.println("Topological test");
+		graph = new boolean[6][6];
+		nodes_num = graph.length;
+		graph[0][1] = true;
+		graph[0][2] = true;
+		graph[1][2] = true;
+		graph[2][4] = true;
+		graph[3][5] = true;
+		graph[4][3] = true;
+		for(int i=0;i<nodes_num;i++){
+			for(int j=0;j<nodes_num;j++){
+				System.out.print(graph[j][i]?" 1 ":" 0 ");
+			}
+			System.out.println();
+		}
+		System.out.println();
+		System.out.println(new Graph<Integer>(graph, new Integer[]{0,1,2,3,4,5}).topologicalSort());
 
 	}
 }
