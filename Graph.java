@@ -1,10 +1,12 @@
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
 
 public class Graph<T>{
+	
 	HashMap<Integer, T> names = new HashMap<>(); // mapping integer to node of type T
-
+	int[][] adjucencyWeightMatrex;
 	HashMap<Integer, ArrayList<Integer>> graph = new HashMap<>();
 	private int nodes_num;
 	public Graph(){
@@ -12,10 +14,13 @@ public class Graph<T>{
 	}
 	public Graph(boolean[][] adjucencyMatrex, T[] nodes){
 		nodes_num = adjucencyMatrex.length;
+		adjucencyWeightMatrex = new int[nodes_num][nodes_num];
 		for(int i=0;i<nodes_num;i++){
 			ArrayList<Integer> adjs = new ArrayList<>();
 			for(int j=0;j<nodes_num;j++){
+				 
 				if(adjucencyMatrex[i][j] == true){
+					adjucencyWeightMatrex[i][j] = 1; // the weight is 1 between the two nodes
 					adjs.add(j);
 				}
 			}
@@ -25,7 +30,27 @@ public class Graph<T>{
 			names.put(i, nodes[i]);
 		}
 	}
-	
+	/***
+	 * receive weights on edges between nodes
+	 * @param adjucencyWeightMatrex
+	 * @param nodes
+	 */
+	public Graph(int[][] adjucencyWeightMatrex, T[] nodes){
+		nodes_num = adjucencyWeightMatrex.length;
+		this.adjucencyWeightMatrex = adjucencyWeightMatrex.clone();
+		for(int i=0;i<nodes_num;i++){
+			ArrayList<Integer> adjs = new ArrayList<>();
+			for(int j=0;j<nodes_num;j++){
+				if(adjucencyWeightMatrex[i][j] != 0){
+					adjs.add(j);
+				}
+			}
+			graph.put(i,  adjs);
+		}
+		for(int i=0;i<nodes_num;i++){
+			names.put(i, nodes[i]);
+		}
+	}
 	public boolean nodeExists(T node){
 		for(int i : names.keySet()){
 			if(names.get(i).equals(node)){
@@ -34,7 +59,159 @@ public class Graph<T>{
 		}
 		return false;
 	}
+	/***
+	 * run Bellman Ford from the node input. it is needed if the graph is directed - in this case we cannot pickup one.
+	 * @param source if the node is null, then the first node will be selected
+	 * @return the distance of each node from the source node in a hashmap and its predecessor in int[2]{distance, predecessor}
+	 */
+	public HashMap<T, Integer[]> bellmanFordSPT(T source){
+		int[] dist = new int[nodes_num];
+		int[] predecessor = new int[nodes_num];
+		
+		
+				
+		int srcIndx = 0;
+		if(source != null){
+			// find the index of the source
+			srcIndx = getNodeIndex(source);
+		}
+		for(int i=0;i<nodes_num;i++){
+			dist[i] = Integer.MAX_VALUE;
+			predecessor[i] = -1;
+		}
+		dist[srcIndx] = 0;
+		for(int u=0;u<nodes_num;u++){
+			for(int v=0;v<nodes_num;v++){ // needed to pass over the edges from node i to j
+				if(v==u){ // no need for self edges
+					continue;
+				}
+				
+				if( dist[v]> dist[u]+ adjucencyWeightMatrex[u][v] ){
+					dist[v] = dist[u]+ adjucencyWeightMatrex[u][v];
+					predecessor[v] = u;
+				}	
+			}
+		}
+		// make sure there are no negative loops as we must quit
+		for(int u=0;u<nodes_num;u++){
+			for(int v=0;v<nodes_num;v++){
+				if(adjucencyWeightMatrex[u][v] != 0 && dist[u]+ adjucencyWeightMatrex[u][v] < dist[u]){
+					// means we have a negative loop
+					throw new IllegalArgumentException("We have a negative loop in the graph");
+				}
+			}
+		}
+		// now set the result into hashtable - each node and its parent
+		HashMap<T, Integer[]> res = new HashMap<>();
+		for(int i=0;i<nodes_num;i++){
+			if(predecessor[i] == -1 && i != srcIndx){ // make sure the predecessor was calculated correctly
+				throw new IllegalArgumentException("Cannot calculate a predecessor for a node");
+			}
+			res.put(names.get(i), new Integer[]{dist[i], predecessor[i]});
+		}
+		return res;
+	}
 	
+	
+	/***
+	 * run dijsktra from the node input. it is needed if the graph is directed - in this case we cannot pickup one.
+	 * in case there is a negative edge, an error will be thrown
+	 * @param source if the node is null, then the first node will be selected
+	 * @return the distance of each node from the source node in a hashmap
+	 */
+	public HashMap<T, Integer> dijsktraSPT(T source){
+		int[] dist = new int[nodes_num];
+		boolean[] sptSet = new boolean[nodes_num];
+		
+				
+		int srcIndx = 0;
+		if(source != null){
+			// find the index of the source
+			srcIndx = getNodeIndex(source);
+			
+		}
+		for(int i=0;i<nodes_num;i++){
+			dist[i] = Integer.MAX_VALUE;
+			sptSet[i] = false;
+		}
+		dist[srcIndx] = 0;
+		for(int i=0;i<nodes_num;i++){
+			int u = getMinDistanceThroughSPTSet(sptSet, dist);
+			sptSet[i] = true;
+			ArrayList<Integer> adj = getAdjucents(u);
+			for(int v : adj){
+				if( adjucencyWeightMatrex[u][v]  < 0){
+					throw new IllegalStateException("Cannot calculate dijkstra on negative weighted edges");
+				}
+	            // Update dist[v] only if is not in sptSet, there is an
+                // edge from u to v, and total weight of path from src (dist[u]) to
+                // v through u is smaller than current value of dist[v]
+				if(!sptSet[v] && dist[u] != Integer.MAX_VALUE && adjucencyWeightMatrex[u][v] !=0 && dist[v]> dist[u]+ adjucencyWeightMatrex[u][v] ){
+					dist[v] = dist[u]+ adjucencyWeightMatrex[u][v];
+				}
+			}
+		}
+		
+		// now set the result into hashtable - each node and its parent
+		HashMap<T, Integer> res = new HashMap<>();
+		for(int i=0;i<nodes_num;i++){
+			res.put(names.get(i), dist[i]);
+		}
+		return res;
+	}
+	
+	/***
+	 * this function is used for dijkstra algorithm and it is to find the min dist node through the cut
+	 * @param sptSet
+	 * @param dist
+	 * @return the index of the minimum node
+	 */
+	private int getMinDistanceThroughSPTSet(boolean[] sptSet, int[] dist) {
+		int index = -1;
+		int min = Integer.MAX_VALUE;
+		for(int i=0;i<nodes_num;i++){
+			if(!sptSet[i] && dist[i] != Integer.MAX_VALUE){
+				if(dist[i] < min){
+					min = dist[i];
+					index = i;
+				}
+			}
+		}
+		return index;
+	}
+	
+	/**
+	 * kruskal is used to calculate the Minimum Spanning Tree (MST) in the graph
+	 * @param source if the node is null, then the first node will be selected
+	 * @return the weight adjacency matrix of the Minimum Spanning Tree (MST)
+	 */
+	public ArrayList<T> kruskalMST(T source){
+		//TODO: 
+		return null;
+	}
+	
+	/**
+	 * Prim is used to calculate the Minimum Spanning Tree (MST) in the graph
+	 * @param source if the node is null, then the first node will be selected
+	 * @return the weight adjacency matrix of the Minimum Spanning Tree (MST)
+	 */
+	public ArrayList<T> primMST(T source){
+		return null;
+	}
+	
+	private int getNodeIndex(T node){
+		int nodeIndex = -1;
+		for(int key : names.keySet()){
+			if(names.get(key).equals(node)){
+				nodeIndex = key;
+				break;
+			}
+		}
+		if(nodeIndex == -1){
+			throw new IllegalArgumentException("The node does not exist");
+		}
+		return nodeIndex;
+	}
 	public ArrayList<T> topologicalSort(){
 		ArrayList<T> res = new ArrayList<>();
 		Stack<Integer> stack = new Stack<>();
@@ -74,14 +251,7 @@ public class Graph<T>{
 		stack.push(root);
 		
 	}
-	private int getNodeIndex(T node){
-		for(int i : names.keySet()){
-			if(names.get(i).equals(node)){
-				return i;
-			}
-		}
-		return -1;
-	}
+
 	
 	public void addNode(final T node){
 		if(!nodeExists(node)){
