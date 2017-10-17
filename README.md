@@ -2,6 +2,9 @@
 
 ## Creation
 You can create a graph using adjacency matrix or using the API to create the nodes and the edges.
+The adjecency matrix can be boolean or int weighted edges.
+
+When adding a edge to empty graph, you can add the weight too.
 
 Here is an example of constructing a graph from adjacencey matrix:
 
@@ -41,4 +44,21 @@ Depth First Traversal can be used to detect cycle in a Graph. DFS for a connecte
 
 ```
 public boolean hasCycle()
+```
+
+## Shortest Path Tree
+SPT (Shortest path tree) can be calculated using whether Dijkstra or Bellman-Ford Algorithm. The first is more efficient. However, it is not effective when we have negative weighted edges. Therefore, in this case, we should be using Bellman-Ford.
+
+The Dijkstra function input is the node we want to start running the algorithm from. since it doesn't matter if the graph is undirected, the value of the input parameter in this case should be null. as a result, the first node will be the source.
+
+Exception of illigal input will be thrown in case there is a negative weighted graph.
+
+```
+public HashMap<T, Integer> dijsktraSPT(T source)
+
+```
+
+The next function will return for each node its distance from source and predecessor. both values in int[2]{dist, predecessor}
+```
+public HashMap<T, Integer[]> bellmanFordSPT(T source)
 ```
