@@ -352,39 +352,37 @@ public class Graph<T> {
 		return res;
 	}
 
-	public boolean hasCycle() {
-		if (nodes_num == 0) {
-			return false;
-		}
-		Stack<Integer> s = new Stack<>();
-		boolean[] visited = new boolean[nodes_num];
-		boolean[] visiting = new boolean[nodes_num];
-		s.push(0);
-		while (!s.isEmpty()) {
-			int n = s.pop();
-
-			visiting[n] = true;
-			ArrayList<Integer> adj = getAdjucents(n);
-			boolean path_ended = true;
-			for (int i : adj) {
-				if (doesEdgeExists(n, i) && visited[i] == false) {
-					if (visiting[i] == true) {
-						return true;
-					}
-					s.push(i);
-					path_ended = false;
-				}
-			}
-			if (path_ended) {
-				for (int i = 0; i < nodes_num; i++) {
-					if (visiting[i] && !visited[i]) {
-						visited[i] = true;
-					}
-					visiting[i] = false;
-				}
+/***
+	 * this is aux function to detect a cycle using dfs
+	 * @param visited
+	 * @param node
+	 * @return
+	 */
+	private boolean dfsCycleDetectAux(boolean[] visited, int node){
+		visited[node] = true;
+		ArrayList<Integer> adj = getAdjucents(node);
+		for(int child : adj){
+			if(! visited[child]){
+				return dfsCycleDetectAux(visited, child);
+						
+			}else{
+				return true; 	// the child is a parent of node. we have a cycle.
 			}
 		}
 		return false;
+	}
+	public boolean hasCycle(){
+		if(nodes_num == 0){
+			return false;
+		}
+		boolean[] visited = new boolean[nodes_num];
+		boolean res = false;
+		for(int key : names.keySet()){ 	// go over all the sub graphs in the graph in case it is disconnected
+			if (visited[key] == false){
+				res = res || dfsCycleDetectAux(visited, key);
+			}
+		}
+		return res;
 	}
 
 	/**
@@ -473,84 +471,6 @@ public class Graph<T> {
 			}
 		}
 		return false;
-	}
-
-	public static void main(String[] args) {
-
-		boolean[][] graph = new boolean[6][6];
-		int nodes_num = graph.length;
-		graph[0][1] = true;
-		graph[0][2] = true;
-		graph[1][2] = true;
-		graph[2][4] = true;
-		graph[3][5] = true;
-		graph[4][3] = true;
-		graph[5][4] = true;
-		for (int i = 0; i < nodes_num; i++) {
-			for (int j = 0; j < nodes_num; j++) {
-				System.out.print(graph[j][i] ? " 1 " : " 0 ");
-			}
-			System.out.println();
-		}
-		System.out.println();
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3, 4, 5 }).hasCycle());
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3, 4, 5 }).hasHamiltonianCycle());
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3, 4, 5 }).getHamiltonianCycle());
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3, 4, 5 }).topologicalSort());
-
-		graph = new boolean[4][4];
-		nodes_num = graph.length;
-		graph[0][1] = true;
-		graph[1][2] = true;
-		graph[2][3] = true;
-		graph[3][0] = true;
-
-		for (int i = 0; i < nodes_num; i++) {
-			for (int j = 0; j < nodes_num; j++) {
-				System.out.print(graph[j][i] ? " 1 " : " 0 ");
-			}
-			System.out.println();
-		}
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3 }).hasCycle());
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3 }).hasHamiltonianCycle());
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3 }).getHamiltonianCycle());
-
-		graph = new boolean[4][4];
-		nodes_num = graph.length;
-		graph[0][1] = true;
-		graph[1][2] = true;
-		graph[2][3] = true;
-		graph[3][0] = true;
-
-		for (int i = 0; i < nodes_num; i++) {
-			for (int j = 0; j < nodes_num; j++) {
-				System.out.print(graph[j][i] ? " 1 " : " 0 ");
-			}
-			System.out.println();
-		}
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3 }).hasCycle());
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3 }).hasHamiltonianCycle());
-
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3 }).getHamiltonianCycle());
-
-		System.out.println("Topological test");
-		graph = new boolean[6][6];
-		nodes_num = graph.length;
-		graph[0][1] = true;
-		graph[0][2] = true;
-		graph[1][2] = true;
-		graph[2][4] = true;
-		graph[3][5] = true;
-		graph[4][3] = true;
-		for (int i = 0; i < nodes_num; i++) {
-			for (int j = 0; j < nodes_num; j++) {
-				System.out.print(graph[j][i] ? " 1 " : " 0 ");
-			}
-			System.out.println();
-		}
-		System.out.println();
-		System.out.println(new Graph<Integer>(graph, new Integer[] { 0, 1, 2, 3, 4, 5 }).topologicalSort());
-
 	}
 
 }
