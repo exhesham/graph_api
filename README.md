@@ -67,4 +67,4 @@ public HashMap<T, Integer[]> bellmanFordSPT(T source)
 
 ## Minimum Spanning Tree
 
-TODO
+Minimum spanning Tree or MST is calculated on a connected weighted graph using Kruskal or Floyd-Warshal. This algorithm is not implemented on this API yet.
